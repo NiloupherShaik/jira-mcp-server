@@ -1,0 +1,21 @@
+#!groovy
+
+String fusionLibrary = 'fusion@main'
+
+library fusionLibrary
+
+def constants = library(fusionLibrary).nable.ecoverse.integrationtests.cloud.Constants
+
+ecoverseCloudIntegrationTests([
+  (constants.SERVICE_ACCOUNT): 'cdo',
+  (constants.JIRA_SCRUM_TEAM): 'Workstream 4',
+  (constants.JIRA_TEST_PLAN_KEY): 'FSN-41970',
+  (constants.CRON_TRIGGER): ['branch': 'main', 'expression': 'H H(0-5) * * 1-5'],
+  (constants.ENVIRONMENT_DEV): [
+    (constants.REGIONS): [(constants.REGION_EUWE1): [:]],
+  ],
+  (constants.ENVIRONMENT_STG): [
+    (constants.REGIONS): [(constants.REGION_EUWE1): [:]],
+    (constants.REGIONS): [(constants.REGION_USWE2): [:]],
+  ],
+])

@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: fusion-ai
+
+resources:
+  - resources/deployment.yaml
+  - resources/service.yaml
+  - resources/horizontal-pod-autoscaler.yaml
+  - resources/pod-disruption-budget.yaml
+  - istio/authorization-policy.yaml
+  - istio/destination-rule.yaml
+  - istio/gateway.yaml
+  - istio/virtual-service.yaml
+
+configMapGenerator:
+  - name: mcp-server-template-config
+    behavior: create
+    literals:
+    - MCP_SERVER_NAME="mcp-server-template"
+    - MCP_SERVER_IS_OTEL_TRACING_ENABLED=true # Setting this to false will use a noop tracer. This can be used if the tracing overhead is too high in prod
+    # These OTEL variables are used internally in the package open telemetry package https://github.com/open-telemetry/opentelemetry-go/blob/c9c9929a2ae58bed5cdaa749cd99ddb6143bdc34/exporters/otlp/otlplog/otlploghttp/config.go#L37
+    - OTEL_TRACES_SAMPLER_ARG="0.1" # 10% This controls the percentage rate of traces that will be recorded. Recommendation is 10% for production, but 100% local/dev/stg.
+    - OTEL_SERVICE_NAME=mcp-server-template
+    - OTEL_TRACES_SAMPLER="parentbased_traceidratio"
+    - OTEL_EXPORTER_OTLP_ENDPOINT="http://forge-splunk-otel-collector.forge.svc.cluster.local:4317" # This is the URL for everywhere but local

@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: mcp-server-template-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 443
+        name: http
+        protocol: HTTPS
+      # https://istio.io/latest/docs/reference/config/networking/gateway/#ServerTLSSettings
+      tls:
+        mode: SIMPLE
+        credentialName: mcp-server-template-cert
+      hosts:
+        - $(MCP_SERVER_HOST)

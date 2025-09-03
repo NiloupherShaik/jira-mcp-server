@@ -1,0 +1,9 @@
+#!groovy
+
+library "fusion@main"
+
+ecoversePipelineRelease(
+        (ecoverseCloudConsts.PIPELINE_TYPE)               : "release",
+        (ecoverseCloudConsts.SKAFFOLD_FILE)               : "skaffold-ci.yaml",
+        (ecoverseCloudConsts.CLOUD)                       : "cdo-prd",
+)

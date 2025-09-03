@@ -1,0 +1,10 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mcp-server-template-pdb
+  namespace: fusion-ai
+spec:
+  minAvailable: 0
+  selector:
+    matchLabels:
+      component: mcp-server-template-deploy

@@ -1,0 +1,6 @@
+permissions:
+  # Properties to control permissions for various actions
+  promoteImage:
+    approvedBranchRegex: "(main)" # Restrict the promoteImage action to only builds of matching branch
+
+options:

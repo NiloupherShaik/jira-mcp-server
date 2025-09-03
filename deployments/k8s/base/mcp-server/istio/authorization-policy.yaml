@@ -1,0 +1,25 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: mcp-server-template-authorization-policy
+  namespace: fusion-ai
+spec:
+  selector:
+    matchLabels:
+      app: mcp-server-template-deploy
+  rules:
+    - from:
+        - source:
+            remoteIpBlocks: [
+              "208.70.88.0/24",
+              "4.7.118.144/29",
+              "209.120.234.64/28",
+              "207.35.253.224/27",
+              "52.209.177.26/32",
+              "52.31.183.60/32",
+              "52.215.209.246/32",
+              "52.178.88.197",
+              "54.78.27.129",
+              "52.17.107.206",
+              "54.220.76.222",
+            ]

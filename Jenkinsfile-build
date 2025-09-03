@@ -1,0 +1,13 @@
+#!groovy
+
+library "fusion@main"
+
+ecoversePipelineBuild([
+        (ecoverseCloudConsts.CLOUD)                       : "cdo-dev",
+        (ecoverseCloudConsts.AWS_SERVICE_ACCOUNT)         : "cdo",
+        (ecoverseCloudConsts.AWS_ACCOUNT_IDS)             : ["dev": "616350704275"],
+        (ecoverseCloudConsts.SKAFFOLD_FILE)               : "skaffold-ci.yaml",
+        (ecoverseCloudConsts.CLUSTERS)                    : [
+                "dev": ["eu-west-1": "slr-cdo-dev-02-euwe1"]
+        ],
+])

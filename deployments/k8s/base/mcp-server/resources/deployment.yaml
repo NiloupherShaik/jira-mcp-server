@@ -1,0 +1,109 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: mcp-server-template-deploy
+  labels:
+    app: mcp-server-template-deploy
+    name: mcp-server-template-deploy
+    component: mcp-server-template-deploy
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcp-server-template-deploy
+      component: mcp-server-template-deploy
+      version: v1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  template:
+    metadata:
+      labels:
+        app: mcp-server-template-deploy
+        name: mcp-server-template-deploy
+        component: mcp-server-template-deploy
+        version: v1
+      annotations:
+        #        prometheus.io/path: /metrics
+        #        prometheus.io/scrape: "true"
+        #        prometheus.io/port: "8083"
+        proxy.istio.io/config: |
+          holdApplicationUntilProxyStarts: true
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: "topology.kubernetes.io/zone"
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: mcp-server-template-deploy
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: "component"
+                      operator: In
+                      values:
+                        - mcp-server-template-deploy
+                topologyKey: kubernetes.io/hostname
+#      serviceAccountName: mcp-server-template-service-account
+      containers:
+        - name: mcp-server-template
+          image: mcp-server
+          ports:
+            - name: http
+              containerPort: 8080
+#          livenessProbe:
+#            httpGet:
+#              path: /healthz
+#              port: 8083
+#            initialDelaySeconds: 15
+          readinessProbe:
+            initialDelaySeconds: 10
+            tcpSocket:
+              port: http
+          envFrom:
+            - configMapRef:
+                name: mcp-server-template-config
+          #          env: TODO: this is only needed for local dev I believe, we can patch it in in the local overlay.
+          #          - name: APOLLO_KEY
+          #            valueFrom:
+          #              secretKeyRef:
+          #                name: apollo-license-secret
+          #                key: APOLLO_KEY
+          #            - name: MCP_SERVER_LD_SDK_KEY
+          #              valueFrom:
+          #                secretKeyRef:
+          #                  name: mcp-server-launchdarkly-sdk-key
+          #                  key: sdk_key
+          #            - name: MCP_SERVER_CERBERUS_SECRET_ID
+          #              valueFrom:
+          #                secretKeyRef:
+          #                  name: mcp-server-cerberus-secret
+          #                  key: sdk_key
+          resources:
+            requests:
+              cpu: 300m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 500Mi
+          imagePullPolicy: Always
+          terminationMessagePolicy: File
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsUser: 1001
+            runAsGroup: 3000
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts: # empty for now so I can apply a patch to all local deployments - this will eventually contain things like LD SDK key etc in a local deployment.
+      volumes: # empty for now so I can apply a patch to all local deployments - this will eventually contain things like LD SDK key etc in a local deployment.
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30

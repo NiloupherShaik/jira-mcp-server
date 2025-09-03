@@ -1,0 +1,22 @@
+# Generate all interfaces for the specified packages.
+all: true
+
+# The directory where the mock file will be outputted to.
+# Currently, the replaceAll function isn't doing as v2, so added a shell mv command in the Makefile to rename the internal directory to internal_
+#dir: 'mocks/{{ replaceAll .InterfaceDirRelative "internal" "internal_" }}'
+dir: 'mocks/{{.InterfaceDirRelative}}'
+
+# The name of the file the mock will reside in.
+filename: '{{.InterfaceName}}.go'
+
+# A dictionary containing configuration describing the packages and interfaces to generate mocks for.
+packages:
+  github.com/nable-fusion/nquery-mcp-servers:
+    config:
+      recursive: true
+
+# The name of the generated interface implementation.
+structname: '{{.InterfaceName}}'
+
+# The template to use. The choices are defined in the Templates section.
+template: testify

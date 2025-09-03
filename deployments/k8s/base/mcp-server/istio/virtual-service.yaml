@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: mcp-server-template-virtual-service
+spec:
+  hosts:
+    - $(MCP_SERVER_HOST)
+  gateways:
+    - mcp-server-template-gateway
+  http:
+    - route:
+        - destination:
+            host: mcp-server-template-service
+            subset: v1
+            port:
+              number: 8080

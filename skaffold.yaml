@@ -1,0 +1,70 @@
+apiVersion: skaffold/v4beta8
+kind: Config
+metadata:
+  name: mcp-server-template
+
+.ko-base-config: &ko-base
+  env:
+    - GOPRIVATE="{{.GOPRIVATE}}"
+    - GONOPROXY="{{.GONOPROXY}}"
+    - GOPROXY="{{.GOPROXY}}"
+    - CGO_ENABLED=0
+
+.ko-build-config: &ko
+  <<: *ko-base
+  flags:
+    - -a
+    - -buildvcs=false
+    - -ldflags=-X 'main.Version={{.VERSION}}' -extldflags '-static'
+    - -tags=netgo
+    - -installsuffix=netgo
+    - -o=/go/bin/service
+
+build:
+  artifacts:
+    - image: mcp-server
+      ko:
+        main: ./cmd/mcp-server
+        <<: *ko
+        dependencies:
+          paths:
+            - cmd/mcp-server/*.go
+            - internal/app/mcp-server/**/*.go
+            - internal/pkg/**/*.go # rebuild everything in the internal/pkg directory - can be split up if it gets too big
+
+  local:
+    concurrency: 0
+    push: false
+    tryImportMissing: false
+
+  tagPolicy:
+    inputDigest: {}
+
+deploy:
+  tolerateFailuresUntilDeadline: true
+
+profiles:
+  - name: local-kind
+    build:
+      local:
+        push: false
+    deploy:
+      kubeContext: kind-ai
+    manifests:
+      kustomize:
+        paths:
+          - deployments/k8s/overlays/local
+    activation:
+      - kubeContext: kind-ai
+
+portForward:
+  - resourceType: Service
+    resourceName: mcp-server-template-service
+    namespace: fusion-ai
+    port: http
+    localPort: 8080
+  - resourceType: Service
+    resourceName: otel-collector
+    namespace: fusion-ai
+    port: 8080
+    localPort: 1323

@@ -1,0 +1,19 @@
+#!groovy
+
+library "fusion@main"
+
+ecoversePipelineDeploy([
+        (ecoverseCloudConsts.CLOUDS) : [
+                "dev": "cdo-dev",
+                "stg": "cdo-stg",
+        ],
+        (ecoverseCloudConsts.AWS_SERVICE_ACCOUNT)       : "cdo",
+        (ecoverseCloudConsts.AWS_ACCOUNT_IDS)             : ["dev": "616350704275", "stg": "086488590575"],
+        (ecoverseCloudConsts.SKAFFOLD_FILE)             : "skaffold-ci.yaml",
+        (ecoverseCloudConsts.CLUSTERS)                    : [
+                "dev": ["eu-west-1": "slr-cdo-dev-02-euwe1"],
+                "stg": [
+                    "eu-west-1": "slr-cdo-stg-02-euwe1",
+                ],
+        ],
+])

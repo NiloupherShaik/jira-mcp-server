@@ -1,0 +1,16 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: mcp-server-template-service
+  labels:
+    app: mcp-server-template-service
+    service: mcp-server-template-service
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: mcp-server-template-deploy
+  type: ClusterIP

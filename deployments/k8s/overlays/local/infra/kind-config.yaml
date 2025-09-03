@@ -1,0 +1,28 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: ai
+nodes:
+  - role: control-plane
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      # Expose HTTP Port
+      - containerPort: 30000
+        hostPort: 80
+        protocol: TCP
+      # Expose HTTPS Port
+      - containerPort: 30001
+        hostPort: 443
+        protocol: TCP
+      # Expose istio health port
+      - containerPort: 30002
+        hostPort: 15021
+        protocol: TCP
+# Uncomment below to enable multi node - this breaks ingress
+#  - role: worker
+#  - role: worker
+#  - role: worker

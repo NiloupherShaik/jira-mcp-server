@@ -1,0 +1,76 @@
+# nonk8s
+# https://portal.n-able.dev/docs/northstar/system/northstar/Containers/Building-Containers-With-Kaniko/#using-skaffold-with-kaniko
+apiVersion: skaffold/v4beta8 # limited to max version supported by Jenkins https://github.com/logicnow/bld-containers/blob/main/ns-build/build/ubuntu/Dockerfile#L77
+kind: Config
+metadata:
+  name: mcp-server-template
+  labels:
+    ecrRepo: mcp-server-template
+
+# Common build args for the dockerfiles
+.buildArgs: &service_build_args
+  ARTIFACTORY_PASSWORD: "{{.ARTIFACTORY_PASSWORD}}"
+  ARTIFACTORY_USERNAME: "{{.ARTIFACTORY_USERNAME}}"
+  GITHUB_PASSWORD: "{{.GITHUB_PASSWORD}}"
+  GITHUB_USERNAME: "{{.GITHUB_USERNAME}}"
+
+# dockerfile for the services
+.dockerfileApp: &docker_file_path_app ./build/package/Dockerfile
+
+# target for in the dockerfile
+.dockerfileTarget: &docker_file_target "release-stage"
+
+# hooks to run prior and after deployments
+.globalHooks: &global_hooks
+  before: []
+  after: []
+
+#  Docker labels to add to all services
+.labels: &labels
+  org.opencontainers.image.authors: "FusionAIScrumTeam@n-able.com"
+  org.opencontainers.image.created: "{{.now}}"
+  org.opencontainers.image.revision: "{{.GIT_COMMIT}}"
+  org.opencontainers.image.source: "https://github.com/nable-fusion/mcp-server/commit/{{.GIT_COMMIT}}"
+  org.opencontainers.image.url: "https://portal.n-able.dev/catalog/default/system/mcp-server"
+  org.opencontainers.image.version: "{{.VERSION}}"
+
+build:
+  #  these are the images to build
+  artifacts:
+    - image: mcp-server
+      context: .
+      kaniko:
+        buildArgs:
+          <<: *service_build_args
+          SERVICE_NAME: mcp-server
+        cache:
+          repo: 263262308774.dkr.ecr.eu-west-1.amazonaws.com/fusion/build/dev/mcp-server-template/mcp-server
+        dockerfile: *docker_file_path_app
+        label:
+          <<: *labels
+        skipUnusedStages: true
+        target: *docker_file_target
+        useNewRun: false
+
+manifests:
+  kustomize:
+    paths:
+      - deployments/k8s/base
+
+profiles:
+  - name: dev-eu-west-1
+    activation:
+      - env: ENV=development
+    build:
+      cluster:
+        serviceAccount: cdo
+        namespace: build-cdo-dev
+    manifests:
+      kustomize:
+        paths:
+          - deployments/k8s/overlays/dev/eu-west-1
+    deploy:
+      kubectl:
+        hooks:
+          <<: *global_hooks
+      kubeContext: arn:aws:eks:eu-west-1:616350704275:cluster/slr-cdo-dev-02-euwe1

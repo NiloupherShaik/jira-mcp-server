@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../../base
+
+replicas:
+  - name: mcp-server-template-deploy
+    count: 1
+
+# Config maps, patches etc go here.
+configMapGenerator:
+  - name: mcp-server-template-vars
+    namespace: fusion-ai
+    behavior: merge
+    literals:
+      - MCP_SERVER_HOST="mcp-server.template.euwe1.dev.cdo.system-monitor.com"
+      - MCP_SERVER_IS_OTEL_TRACING_ENABLED=true
+      - OTEL_TRACES_SAMPLER_ARG="1.0" # 100%

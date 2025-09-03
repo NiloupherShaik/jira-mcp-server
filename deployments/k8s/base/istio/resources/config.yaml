@@ -1,0 +1,20 @@
+varReference:
+  # VirtualService support
+  - path: spec/hosts
+    kind: VirtualService
+
+  # Gateway support
+  - path: spec/servers/hosts
+    kind: Gateway
+
+  # Certificate support
+  - path: spec/dnsNames
+    kind: Certificate
+  - path: spec/commonName
+    kind: Certificate
+
+  # RequestAuthentication support
+  - path: spec/jwtRules/issuer
+    kind: RequestAuthentication
+  - path: spec/jwtRules/jwksUri
+    kind: RequestAuthentication
