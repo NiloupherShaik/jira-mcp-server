@@ -30,7 +30,7 @@ COPY internal/app/${SERVICE_NAME}/ ./internal/app/${SERVICE_NAME}/
 RUN make
 
 # Step 2 - Run application
-FROM public.ecr.aws/docker/library/alpine:3.20.0 as release-stage
+FROM public.ecr.aws/docker/library/alpine:3.22.1 as release-stage
 COPY --from=build-stage /go/bin/service /service
 
 CMD ["/service"]
