@@ -1,5 +1,5 @@
 # Step 1 - Build executable
-FROM public.ecr.aws/docker/library/golang:1.24.3-bullseye AS build-stage
+FROM public.ecr.aws/docker/library/golang:1.24.6-bullseye AS build-stage
 
 WORKDIR /go/src/app
 
